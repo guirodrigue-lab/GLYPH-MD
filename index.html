@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLYPH // MD COMMAND CENTER</title>
+    <style>
+        :root {
+            --bg-obsidian: #080809;
+            --panel-steel: #1c1d21;
+            --lcd-green: #32d74b;
+            --logic-blue: #00aaff;
+            --border-highlight: rgba(255, 255, 255, 0.05);
+            --text-dim: #555;
+        }
+
+        body {
+            background-color: var(--bg-obsidian);
+            color: #d1d1d1;
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BOOT SEQUENCE STYLES */
+        #boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+        }
+
+        .boot-logo {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 20px;
+            background: linear-gradient(to bottom, #fff, #444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .boot-text {
+            color: var(--lcd-green);
+            font-size: 0.8rem;
+            height: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #1a1b1e 0%, #111214 100%);
+            border-right: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            border-bottom: 1px solid #2d2e32;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .song-list {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .song-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 8px;
+            background: linear-gradient(to bottom, #25262b, #1e1f23);
+            border: 1px solid #000;
+            border-top: 1px solid var(--border-highlight);
+            border-radius: 6px;
+            color: #888;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .song-btn.active {
+            border: 1px solid var(--logic-blue);
+            color: #fff;
+            background: linear-gradient(to bottom, #2d2e33, #151619);
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.2);
+        }
+
+        .drop-zone {
+            margin: 15px;
+            padding: 20px;
+            border: 1px dashed #333;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #444;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .drop-zone.hover {
+            border-color: var(--logic-blue);
+            color: var(--logic-blue);
+            background: rgba(0, 170, 255, 0.05);
+        }
+
+        /* MAIN DASHBOARD */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .top-nav {
+            height: 70px;
+            background: #111;
+            border-bottom: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 20px;
+        }
+
+        .lcd-display {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px 40px;
+            font-family: 'Courier New', monospace;
+            color: var(--lcd-green);
+            text-shadow: 0 0 8px rgba(50, 215, 75, 0.6);
+            font-size: 1.6rem;
+            box-shadow: inset 0 0 10px #000;
+        }
+
+        .stage {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #1a1b1f 0%, #080809 100%);
+        }
+
+        .section-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 50px 100px;
+            border-radius: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            min-width: 65%;
+        }
+
+        .section-label {
+            font-size: 8vw;
+            font-weight: 900;
+            margin: 0;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff 40%, #777 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lyrics-cue {
+            font-size: 2.2vw;
+            color: #666;
+            font-weight: 300;
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+
+        /* METERING */
+        .meter-box {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .beat-digit {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fff;
+            z-index: 2;
+        }
+
+        /* TRANSPORT FOOTER */
+        .footer {
+            height: 140px;
+            background: linear-gradient(to bottom, #1c1d21, #0a0a0b);
+            border-top: 1px solid #333;
+            display: flex;
+            align-items: center;
+            padding: 0 50px;
+            gap: 50px;
+        }
+
+        .transport-btns {
+            display: flex;
+            gap: 15px;
+        }
+
+        .circle-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: 0.2s;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.1);
+        }
+
+        .play-btn {
+            background: radial-gradient(circle, #32d74b, #1a6d26);
+            color: #000;
+        }
+
+        .play-btn.active {
+            box-shadow: 0 0 25px rgba(50, 215, 75, 0.6);
+            transform: scale(0.95);
+        }
+
+        .stop-btn {
+            background: radial-gradient(circle, #444, #222);
+            color: #fff;
+        }
+
+        .fader-container {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            accent-color: var(--logic-blue);
+            cursor: pointer;
+        }
+
+        svg {
+            transform: rotate(-90deg);
+            position: absolute;
+        }
+
+        .ring-fill {
+            fill: none;
+            stroke: var(--logic-blue);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 502;
+            stroke-dashoffset: 502;
+            transition: 0.1s linear;
+        }
+
+        .save-btn {
+            background: none;
+            border: 1px solid #444;
+            color: #666;
+            padding: 4px 8px;
+            font-size: 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            border-color: var(--logic-blue);
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="boot-screen">
+        <div class="boot-logo" id="logo">GLYPH</div>
+        <div class="boot-text" id="status">INITIALIZING SYSTEM...</div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            GLYPH SETLIST
+            <button class="save-btn" onclick="engine.exportSetlist()">SAVE FILE</button>
+        </div>
+        <div class="song-list" id="setlist"></div>
+        <div class="drop-zone" id="drop-zone">DROP .JSON SETLIST</div>
+    </div>
+
+    <div class="main">
+        <div class="top-nav">
+            <div id="active-title" style="font-weight: bold; letter-spacing: 2px; color: var(--logic-blue);">READY</div>
+            <div class="lcd-display" id="lcd-clock">001 . 1</div>
+            <div style="font-size: 0.8rem; color: #555;">BPM: <span id="bpm-ui"
+                    style="color:white; font-size: 1.3rem;">--</span></div>
+        </div>
+
+        <div class="stage">
+            <div class="section-box">
+                <h1 id="section-ui" class="section-label">STANDBY</h1>
+                <div id="lyrics-ui" class="lyrics-cue">System Online // Load Track to Begin</div>
+            </div>
+
+            <div class="meter-box">
+                <svg width="180" height="180">
+                    <circle cx="90" cy="90" r="80" fill="none" stroke="#1a1a1c" stroke-width="12" />
+                    <circle id="beat-ring" class="ring-fill" cx="90" cy="90" r="80" />
+                </svg>
+                <div class="beat-digit" id="beat-ui">—</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="transport-btns">
+                <div id="play-btn" class="circle-btn play-btn" onclick="engine.start()">▶</div>
+                <div class="circle-btn stop-btn" onclick="engine.stop()">■</div>
+            </div>
+
+            <div class="fader-container">
+                <div
+                    style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #444; margin-bottom: 10px;">
+                    <span>CLICK GAIN</span> <span id="vol-txt">50%</span>
+                </div>
+                <input type="range" id="vol-fader" min="0" max="1" step="0.01" value="0.5">
+            </div>
+
+            <div
+                style="font-size: 0.7rem; color: #222; text-align: right; line-height: 1.5; font-weight: bold; letter-spacing: 1px;">
+                GLYPH ENGINE V2.4<br>PRECISION MD UTILITY
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial Default Data
+        let DATA = [
+            {
+                title: "Amazing Grace", bpm: 72,
+                flow: [
+                    { name: "Intro", bars: 2, lyrics: "Organ Swell" },
+                    { name: "Verse 1", bars: 4, lyrics: "Amazing Grace..." },
+                    { name: "Chorus", bars: 4, lyrics: "I once was lost..." }
+                ]
+            },
+            {
+                title: "Total Praise", bpm: 64,
+                flow: [
+                    { name: "Chorus", bars: 4, lyrics: "Source of my strength" },
+                    { name: "Amen", bars: 8, lyrics: "A-men, A-men..." }
+                ]
+            }
+        ];
+
+        class GlyphEngine {
+            constructor() {
+                this.ctx = null; this.masterGain = null; this.playing = false;
+                this.songIdx = 0; this.beat = 0; this.bar = 0; this.sectionIdx = 0; this.timer = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.value = 0.5;
+                    this.masterGain.connect(this.ctx.destination);
+                }
+            }
+
+            start() {
+                this.init(); this.ctx.resume();
+                if (this.playing) return;
+                this.playing = true;
+                document.getElementById('play-btn').classList.add('active');
+                this.updateUI(); this.scheduler();
+            }
+
+            stop() {
+                this.playing = false; clearTimeout(this.timer);
+                this.beat = 0; this.bar = 0; this.sectionIdx = 0;
+                document.getElementById('play-btn').classList.remove('active');
+                document.getElementById('beat-ui').innerText = "—";
+                document.getElementById('beat-ring').style.strokeDashoffset = 502;
+                document.getElementById('lcd-clock').innerText = "001 . 1";
+            }
+
+            updateUI() {
+                const song = DATA[this.songIdx];
+                const section = song.flow[this.sectionIdx];
+                document.getElementById('active-title').innerText = song.title.toUpperCase();
+                document.getElementById('bpm-ui').innerText = song.bpm;
+                document.getElementById('section-ui').innerText = section.name;
+                document.getElementById('lyrics-ui').innerText = section.lyrics;
+            }
+
+            scheduler() {
+                if (!this.playing) return;
+                const song = DATA[this.songIdx];
+                const section = song.flow[this.sectionIdx];
+
+                const osc = this.ctx.createOscillator();
+                const panner = this.ctx.createStereoPanner();
+                osc.frequency.value = this.beat === 0 ? 1000 : 500;
+                panner.pan.value = -1.0; // Hard left for click
+                osc.connect(panner).connect(this.masterGain);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+
+                document.getElementById('beat-ui').innerText = this.beat + 1;
+                document.getElementById('lcd-clock').innerText = `${String(this.bar + 1).padStart(3, '0')} . ${this.beat + 1}`;
+                document.getElementById('beat-ring').style.strokeDashoffset = 502 - ((this.beat + 1) / 4) * 502;
+
+                this.beat++;
+                if (this.beat >= 4) {
+                    this.beat = 0; this.bar++;
+                    if (this.bar >= section.bars) {
+                        this.bar = 0; this.sectionIdx++;
+                        if (this.sectionIdx >= song.flow.length) { this.stop(); return; }
+                    }
+                    this.updateUI();
+                }
+                this.timer = setTimeout(() => this.scheduler(), (60 / song.bpm) * 1000);
+            }
+
+            exportSetlist() {
+                const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); a.download = 'glyph-setlist.json'; a.click();
+            }
+        }
+
+        const engine = new GlyphEngine();
+
+        // UI RENDERERS
+        function renderSetlist() {
+            const list = document.getElementById('setlist');
+            list.innerHTML = "";
+            DATA.forEach((song, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'song-btn' + (i === engine.songIdx ? ' active' : '');
+                btn.innerHTML = `<b>${song.title}</b><br><small style="opacity:0.4">${song.bpm} BPM</small>`;
+                btn.onclick = () => { engine.stop(); engine.songIdx = i; renderSetlist(); engine.updateUI(); };
+                list.appendChild(btn);
+            });
+        }
+
+        // BOOT SEQUENCE LOGIC
+        window.onload = () => {
+            const logo = document.getElementById('logo');
+            const status = document.getElementById('status');
+            const screen = document.getElementById('boot-screen');
+
+            setTimeout(() => { logo.style.opacity = "1"; logo.style.transform = "translateY(0)"; }, 500);
+
+            const logs = ["CORE AUDIO LOADED", "MAP-UI INITIALIZED", "PRESTIGE SKIN ACTIVE", "SYSTEM READY"];
+            logs.forEach((msg, i) => {
+                setTimeout(() => { status.innerText = msg; }, 1000 + (i * 600));
+            });
+
+            setTimeout(() => {
+                screen.style.transition = "1s ease-in";
+                screen.style.opacity = "0";
+                setTimeout(() => { screen.style.display = "none"; }, 1000);
+            }, 3800);
+            renderSetlist();
+        };
+
+        // FILE DRAG AND DROP
+        const zone = document.getElementById('drop-zone');
+        zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('hover'); };
+        zone.ondragleave = () => zone.classList.remove('hover');
+        zone.ondrop = (e) => {
+            e.preventDefault(); zone.classList.remove('hover');
+            const file = e.dataTransfer.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    DATA = JSON.parse(event.target.result);
+                    engine.stop(); engine.songIdx = 0;
+                    renderSetlist(); engine.updateUI();
+                    zone.innerText = "LOADED: " + file.name.toUpperCase();
+                } catch (err) { alert("ERROR: INVALID SETLIST FORMAT"); }
+            };
+            reader.readAsText(file);
+        };
+
+        // CONTROLS
+        document.getElementById('vol-fader').oninput = (e) => {
+            if (engine.masterGain) engine.masterGain.gain.setTargetAtTime(e.target.value, engine.ctx.currentTime, 0.03);
+            document.getElementById('vol-txt').innerText = Math.round(e.target.value * 100) + "%";
+        };
+
+        window.onkeydown = (e) => {
+            if (e.code === "Space") { e.preventDefault(); engine.playing ? engine.stop() : engine.start(); }
+            if (e.key === "r" || e.key === "R") { engine.stop(); engine.start(); }
+        };
+    </script>
+</body>
+
+</html>
