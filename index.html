@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLYPH // PRO DISRUPTOR</title>
+    <title>GLYPH // OBSIDIAN PRO</title>
     <style>
         :root {
             --bg-obsidian: #050506;
-            --panel-steel: #1c1d21;
+            --panel-dark: #0c0c0d;
             --lcd-green: #32d74b;
             --logic-blue: #00aaff;
             --vamp-orange: #ff9f0a;
-            --text-dim: #555;
+            --border-muted: rgba(255,255,255,0.03);
         }
 
         body {
@@ -19,101 +19,105 @@
             color: #d1d1d1;
             font-family: 'Inter', sans-serif;
             margin: 0; display: flex; height: 100vh; overflow: hidden;
-            transition: background 0.8s ease;
+            transition: background 1.2s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        /* SECTION COLOR STATES */
-        body.vamp-active { background-color: #1a0f00; }
-        body.section-verse { background: radial-gradient(circle at center, #0a1322 0%, #050506 100%); }
-        body.section-chorus { background: radial-gradient(circle at center, #220a0a 0%, #050506 100%); }
-        body.section-bridge { background: radial-gradient(circle at center, #1b0a22 0%, #050506 100%); }
+        /* ATMOSPHERIC GLOWS (Subtle, not washed out) */
+        body.section-verse { background: radial-gradient(circle at center, #0a162b 0%, #050506 100%); }
+        body.section-chorus { background: radial-gradient(circle at center, #2b0a0a 0%, #050506 100%); }
+        body.section-bridge { background: radial-gradient(circle at center, #1e0a2b 0%, #050506 100%); }
 
         /* BOOT SCREEN */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 1000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; font-family: monospace;
+            align-items: center; justify-content: center;
         }
         .boot-logo { font-size: 4rem; font-weight: 900; letter-spacing: 20px; color: #fff; opacity: 0; transition: 1.5s; }
 
-        /* SIDEBAR */
+        /* SIDEBAR (Back to Deep Black) */
         .sidebar {
-            width: 300px; background: rgba(20, 20, 22, 0.95);
-            border-right: 1px solid #222; display: flex; flex-direction: column; z-index: 10;
-            backdrop-filter: blur(10px);
+            width: 280px; background: #000;
+            border-right: 1px solid #1a1a1c; display: flex; flex-direction: column; z-index: 10;
         }
         .sidebar-header {
-            padding: 25px 20px; font-size: 0.7rem; text-transform: uppercase;
-            letter-spacing: 2px; color: var(--text-dim); border-bottom: 1px solid #222;
+            padding: 25px 20px; font-size: 0.65rem; text-transform: uppercase;
+            letter-spacing: 2px; color: #444; border-bottom: 1px solid #111;
             display: flex; justify-content: space-between;
         }
         .song-list { padding: 15px; overflow-y: auto; flex: 1; }
         .song-btn {
-            width: 100%; padding: 15px; margin-bottom: 8px;
-            background: #161719; border: 1px solid #222;
-            border-radius: 6px; color: #666; text-align: left; cursor: pointer;
+            width: 100%; padding: 14px; margin-bottom: 8px;
+            background: #080809; border: 1px solid #161618;
+            border-radius: 4px; color: #555; text-align: left; cursor: pointer; transition: 0.2s;
         }
-        .song-btn.active { border-color: var(--logic-blue); color: #fff; background: #1c1d21; }
+        .song-btn.active { border-color: var(--logic-blue); color: #fff; background: #111; box-shadow: 0 0 15px rgba(0, 170, 255, 0.05); }
 
-        /* MAIN UI */
-        .main { flex: 1; display: flex; flex-direction: column; }
+        /* MAIN DASHBOARD */
+        .main { flex: 1; display: flex; flex-direction: column; background: transparent; }
         .top-nav {
-            height: 80px; background: rgba(0,0,0,0.5); border-bottom: 1px solid #222;
+            height: 70px; background: rgba(0,0,0,0.8); border-bottom: 1px solid #111;
             display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
         }
         .lcd-display {
-            background: #000; border: 1px solid #333; border-radius: 6px;
-            padding: 10px 30px; font-family: 'Courier New', monospace;
-            color: var(--lcd-green); font-size: 1.8rem; position: relative;
+            background: #000; border: 1px solid #222; border-radius: 4px;
+            padding: 8px 30px; font-family: 'Courier New', monospace;
+            color: var(--lcd-green); font-size: 1.6rem; position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,1);
         }
         #vamp-indicator { 
-            position: absolute; top: -10px; right: 10px; font-size: 0.6rem; 
-            color: var(--vamp-orange); display: none; font-weight: bold;
+            position: absolute; top: -12px; right: 0; font-size: 0.55rem; 
+            color: var(--vamp-orange); display: none; font-weight: bold; letter-spacing: 1px;
         }
 
         .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* THE HUD */
-        .section-box { text-align: center; margin-bottom: 20px; }
         .section-label {
             font-size: 9vw; font-weight: 900; margin: 0; text-transform: uppercase;
-            color: #fff; text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: linear-gradient(to bottom, #fff 40%, #888 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
         }
         .next-up-card {
-            background: rgba(255,255,255,0.05); padding: 10px 30px; border-radius: 40px;
-            color: var(--text-dim); font-size: 1.2rem; text-transform: uppercase;
-            letter-spacing: 3px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.4); padding: 8px 25px; border-radius: 4px;
+            color: #444; font-size: 1rem; text-transform: uppercase;
+            letter-spacing: 4px; border: 1px solid #111; margin-top: 10px;
         }
-        .next-up-card span { color: var(--logic-blue); font-weight: bold; }
+        .next-up-card span { color: var(--logic-blue); }
 
         /* BEAT RING */
-        .meter-box { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-top: 30px; }
-        .beat-digit { font-size: 3rem; font-weight: 900; color: #fff; }
+        .meter-box { position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; margin-top: 40px; }
+        .beat-digit { font-size: 2.5rem; font-weight: 900; color: #222; z-index: 2; transition: 0.1s; }
+        .beat-digit.active { color: #fff; text-shadow: 0 0 10px #fff; }
         svg { transform: rotate(-90deg); position: absolute; }
-        .ring-fill { fill: none; stroke: var(--logic-blue); stroke-width: 8; stroke-dasharray: 440; stroke-dashoffset: 440; transition: 0.1s linear; }
+        .ring-fill { fill: none; stroke: var(--logic-blue); stroke-width: 6; stroke-dasharray: 440; stroke-dashoffset: 440; transition: 0.1s linear; }
 
         /* FOOTER */
         .footer {
-            height: 100px; background: #000; border-top: 1px solid #222;
+            height: 90px; background: #000; border-top: 1px solid #111;
             display: flex; align-items: center; padding: 0 40px; justify-content: space-between;
         }
-        .btn-group { display: flex; gap: 10px; }
-        .save-btn { background: #222; border: none; color: #aaa; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-        .play-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--lcd-green); border: none; cursor: pointer; font-size: 1.2rem; }
-        .play-btn.active { background: var(--vamp-orange); box-shadow: 0 0 20px var(--vamp-orange); }
+        .play-btn { 
+            width: 45px; height: 45px; border-radius: 50%; background: #1a1a1c; 
+            border: 1px solid #333; color: #fff; cursor: pointer; transition: 0.2s;
+        }
+        .play-btn.active { background: var(--lcd-green); color: #000; border-color: var(--lcd-green); box-shadow: 0 0 20px rgba(50, 215, 75, 0.2); }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 2px; background: #222; accent-color: var(--logic-blue); }
+        .save-btn { background: none; border: 1px solid #222; color: #444; padding: 5px 10px; font-size: 0.6rem; cursor: pointer; border-radius: 3px; }
+        .save-btn:hover { border-color: #444; color: #888; }
     </style>
 </head>
 <body class="section-verse">
 
     <div id="boot-screen">
         <div class="boot-logo" id="logo">GLYPH</div>
-        <div id="status" style="color: #444; margin-top: 10px;">SYSTEM START</div>
     </div>
 
     <div class="sidebar">
         <div class="sidebar-header">
-            COMMAND
-            <div class="btn-group">
+            GLYPH v2.5
+            <div style="display: flex; gap: 5px;">
                 <button class="save-btn" onclick="engine.downloadSample()">SAMPLE</button>
                 <button class="save-btn" onclick="engine.exportSetlist()">SAVE</button>
             </div>
@@ -123,19 +127,17 @@
 
     <div class="main">
         <div class="top-nav">
-            <div id="active-title" style="letter-spacing: 2px; color: #fff; font-weight: bold;">STANDBY</div>
+            <div id="active-title" style="letter-spacing: 2px; color: #444; font-size: 0.8rem; font-weight: bold;">SYSTEM STANDBY</div>
             <div class="lcd-display">
-                <div id="vamp-indicator">● LOOP ACTIVE</div>
+                <div id="vamp-indicator">VAMP LOOP ACTIVE</div>
                 <span id="lcd-clock">001 . 1</span>
             </div>
-            <div style="text-align: right; color: #555;">BPM: <span id="bpm-ui" style="color:white;">--</span></div>
+            <div style="text-align: right; color: #444; font-size: 0.7rem; letter-spacing: 1px;">BPM: <span id="bpm-ui" style="color:#fff; font-size: 1rem;">--</span></div>
         </div>
 
         <div class="stage">
-            <div class="section-box">
-                <h1 id="section-ui" class="section-label">GLYPH</h1>
-                <div id="lyrics-ui" style="color: #888; font-size: 1.5rem; margin-top: 10px;">Ready to Lead</div>
-            </div>
+            <div id="section-ui" class="section-label">GLYPH</div>
+            <div id="lyrics-ui" style="color: #444; font-size: 1.2rem; margin-top: 10px; letter-spacing: 1px;">High-Performance Engine</div>
 
             <div class="next-up-card">
                 NEXT: <span id="next-section-ui">---</span>
@@ -143,7 +145,7 @@
 
             <div class="meter-box">
                 <svg width="150" height="150">
-                    <circle cx="75" cy="75" r="70" fill="none" stroke="#111" stroke-width="8" />
+                    <circle cx="75" cy="75" r="70" fill="none" stroke="#0a0a0b" stroke-width="6" />
                     <circle id="beat-ring" class="ring-fill" cx="75" cy="75" r="70" />
                 </svg>
                 <div class="beat-digit" id="beat-ui">—</div>
@@ -153,10 +155,10 @@
         <div class="footer">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <button id="play-btn" class="play-btn" onclick="engine.toggle()">▶</button>
-                <div style="font-size: 0.7rem; color: #444;">[SPACE] PLAY/STOP  |  [L] VAMP LOOP</div>
+                <div style="font-size: 0.6rem; color: #222; text-transform: uppercase; letter-spacing: 1px;">[Space] Toggle Engine | [L] Toggle Vamp</div>
             </div>
-            <div style="width: 200px;">
-                <input type="range" id="vol-fader" min="0" max="1" step="0.01" value="0.5" style="width: 100%;">
+            <div style="width: 150px;">
+                <input type="range" id="vol-fader" min="0" max="1" step="0.01" value="0.5">
             </div>
         </div>
     </div>
@@ -166,8 +168,7 @@
         { "title": "Amazing Grace", "bpm": 72, "flow": [
             { "name": "Intro", "bars": 2, "lyrics": "Organ Swell" },
             { "name": "Verse", "bars": 4, "lyrics": "Amazing Grace..." },
-            { "name": "Chorus", "bars": 4, "lyrics": "I once was lost..." },
-            { "name": "Outro", "bars": 2, "lyrics": "End on Tag" }
+            { "name": "Chorus", "bars": 4, "lyrics": "I once was lost..." }
         ]}
     ];
 
@@ -183,15 +184,12 @@
             this.ctx = new (window.AudioContext || window.webkitAudioContext)();
             this.gain = this.ctx.createGain();
             this.panner = this.ctx.createStereoPanner();
-            this.panner.pan.value = -1; // Click Hard Left
+            this.panner.pan.value = -1;
             this.gain.connect(this.ctx.destination);
             this.panner.connect(this.gain);
         }
 
-        toggle() {
-            this.init();
-            this.playing ? this.stop() : this.start();
-        }
+        toggle() { this.init(); this.playing ? this.stop() : this.start(); }
 
         start() {
             this.playing = true;
@@ -206,7 +204,8 @@
             document.getElementById('play-btn').classList.remove('active');
             document.getElementById('play-btn').innerText = "▶";
             document.getElementById('beat-ui').innerText = "—";
-            document.body.className = "section-verse";
+            document.getElementById('beat-ui').classList.remove('active');
+            document.body.className = "";
         }
 
         toggleVamp() {
@@ -226,7 +225,6 @@
             document.getElementById('lyrics-ui').innerText = section.lyrics;
             document.getElementById('next-section-ui').innerText = next.name;
 
-            // Update Background Color
             const name = section.name.toLowerCase();
             document.body.className = "";
             if (name.includes("verse")) document.body.classList.add("section-verse");
@@ -239,15 +237,16 @@
             const song = DATA[this.songIdx];
             const section = song.flow[this.sectionIdx];
 
-            // Sound
             const osc = this.ctx.createOscillator();
             osc.frequency.value = this.beat === 0 ? 1000 : 500;
             osc.connect(this.panner);
             osc.start(); osc.stop(this.ctx.currentTime + 0.05);
 
-            // Visuals
             this.updateUI();
-            document.getElementById('beat-ui').innerText = this.beat + 1;
+            const bDigit = document.getElementById('beat-ui');
+            bDigit.innerText = this.beat + 1;
+            bDigit.classList.add('active'); setTimeout(() => bDigit.classList.remove('active'), 100);
+            
             document.getElementById('lcd-clock').innerText = `${String(this.bar + 1).padStart(3, '0')} . ${this.beat + 1}`;
             document.getElementById('beat-ring').style.strokeDashoffset = 440 - ((this.beat + 1) / 4) * 440;
 
@@ -255,12 +254,10 @@
             if (this.beat >= 4) {
                 this.beat = 0; this.bar++;
                 if (this.bar >= section.bars) {
-                    if (this.vamp) {
-                        this.bar = 0; // REPEAT SECTION
-                    } else {
+                    if (!this.vamp) {
                         this.bar = 0; this.sectionIdx++;
                         if (this.sectionIdx >= song.flow.length) { this.stop(); return; }
-                    }
+                    } else { this.bar = 0; }
                 }
             }
             this.timer = setTimeout(() => this.scheduler(), (60 / song.bpm) * 1000);
@@ -269,17 +266,17 @@
         exportSetlist() {
             const blob = new Blob([JSON.stringify(DATA, null, 2)], {type : 'application/json'});
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = 'glyph-pro-setlist.json'; a.click();
+            a.download = 'glyph-pro.json'; a.click();
         }
 
         downloadSample() {
             const sample = [
-                { "title": "Praise Break", "bpm": 145, "flow": [{ "name": "VAMP", "bars": 4, "lyrics": "Keep it pushing!" }] },
-                { "title": "Worship Medley", "bpm": 70, "flow": [{ "name": "Verse", "bars": 8, "lyrics": "Holy Forever" }, { "name": "Chorus", "bars": 8, "lyrics": "Singing Holy..." }] }
+                { "title": "I Thank God", "bpm": 130, "flow": [{ "name": "Intro", "bars": 4, "lyrics": "High Energy" }, { "name": "Chorus", "bars": 8, "lyrics": "He saved me!" }] },
+                { "title": "Total Praise", "bpm": 62, "flow": [{ "name": "Amen", "bars": 12, "lyrics": "A-men..." }] }
             ];
             const blob = new Blob([JSON.stringify(sample, null, 2)], {type : 'application/json'});
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = 'glyph-sample.json'; a.click();
+            a.download = 'sunday-sample.json'; a.click();
         }
     }
 
@@ -299,13 +296,17 @@
 
     window.onload = () => {
         setTimeout(() => { document.getElementById('logo').style.opacity = "1"; }, 500);
-        setTimeout(() => { document.getElementById('boot-screen').style.display = "none"; }, 3000);
+        setTimeout(() => { document.getElementById('boot-screen').style.display = "none"; }, 2500);
         renderSetlist();
     };
 
     window.onkeydown = (e) => {
         if (e.code === "Space") { e.preventDefault(); engine.toggle(); }
         if (e.key.toLowerCase() === "l") { engine.toggleVamp(); }
+    };
+
+    document.getElementById('vol-fader').oninput = (e) => {
+        if (engine.gain) engine.gain.gain.setTargetAtTime(e.target.value, engine.ctx.currentTime, 0.03);
     };
 </script>
 </body>
