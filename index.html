@@ -3,166 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLYPH // MD COMMAND CENTER</title>
+    <title>GLYPH // PRO DISRUPTOR</title>
     <style>
         :root {
-            --bg-obsidian: #080809;
+            --bg-obsidian: #050506;
             --panel-steel: #1c1d21;
             --lcd-green: #32d74b;
             --logic-blue: #00aaff;
-            --border-highlight: rgba(255,255,255,0.05);
+            --vamp-orange: #ff9f0a;
             --text-dim: #555;
         }
 
         body {
             background-color: var(--bg-obsidian);
             color: #d1d1d1;
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0; display: flex; height: 100vh; overflow: hidden;
+            transition: background 0.8s ease;
         }
 
-        /* BOOT SEQUENCE */
+        /* SECTION COLOR STATES */
+        body.vamp-active { background-color: #1a0f00; }
+        body.section-verse { background: radial-gradient(circle at center, #0a1322 0%, #050506 100%); }
+        body.section-chorus { background: radial-gradient(circle at center, #220a0a 0%, #050506 100%); }
+        body.section-bridge { background: radial-gradient(circle at center, #1b0a22 0%, #050506 100%); }
+
+        /* BOOT SCREEN */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 1000; display: flex; flex-direction: column;
             align-items: center; justify-content: center; font-family: monospace;
         }
-        .boot-logo {
-            font-size: 4rem; font-weight: 900; letter-spacing: 20px;
-            background: linear-gradient(to bottom, #fff, #444);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 20px; opacity: 0; transform: translateY(10px);
-            transition: 1.5s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .boot-text { color: var(--lcd-green); font-size: 0.8rem; height: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .boot-logo { font-size: 4rem; font-weight: 900; letter-spacing: 20px; color: #fff; opacity: 0; transition: 1.5s; }
 
         /* SIDEBAR */
         .sidebar {
-            width: 300px; background: linear-gradient(135deg, #1a1b1e 0%, #111214 100%);
-            border-right: 2px solid #000; display: flex; flex-direction: column; z-index: 10;
+            width: 300px; background: rgba(20, 20, 22, 0.95);
+            border-right: 1px solid #222; display: flex; flex-direction: column; z-index: 10;
+            backdrop-filter: blur(10px);
         }
         .sidebar-header {
             padding: 25px 20px; font-size: 0.7rem; text-transform: uppercase;
-            letter-spacing: 2px; color: var(--text-dim); border-bottom: 1px solid #2d2e32;
-            display: flex; justify-content: space-between; align-items: center;
+            letter-spacing: 2px; color: var(--text-dim); border-bottom: 1px solid #222;
+            display: flex; justify-content: space-between;
         }
         .song-list { padding: 15px; overflow-y: auto; flex: 1; }
         .song-btn {
             width: 100%; padding: 15px; margin-bottom: 8px;
-            background: linear-gradient(to bottom, #25262b, #1e1f23);
-            border: 1px solid #000; border-top: 1px solid var(--border-highlight);
-            border-radius: 6px; color: #888; text-align: left; cursor: pointer; transition: 0.2s;
+            background: #161719; border: 1px solid #222;
+            border-radius: 6px; color: #666; text-align: left; cursor: pointer;
         }
-        .song-btn.active {
-            border: 1px solid var(--logic-blue); color: #fff;
-            background: linear-gradient(to bottom, #2d2e33, #151619);
-            box-shadow: 0 0 15px rgba(0, 170, 255, 0.1);
-        }
+        .song-btn.active { border-color: var(--logic-blue); color: #fff; background: #1c1d21; }
 
-        /* DROP ZONE & CONTROLS */
-        .drop-zone {
-            margin: 15px; padding: 20px; border: 1px dashed #333;
-            border-radius: 8px; text-align: center; font-size: 0.65rem;
-            color: #444; transition: 0.3s; cursor: pointer;
-        }
-        .drop-zone.hover { border-color: var(--logic-blue); color: var(--logic-blue); background: rgba(0,170,255,0.05); }
-
-        /* MAIN DASHBOARD */
-        .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        /* MAIN UI */
+        .main { flex: 1; display: flex; flex-direction: column; }
         .top-nav {
-            height: 70px; background: #111; border-bottom: 2px solid #000;
-            display: flex; align-items: center; justify-content: space-around; padding: 0 20px;
+            height: 80px; background: rgba(0,0,0,0.5); border-bottom: 1px solid #222;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
         }
         .lcd-display {
-            background: #000; border: 1px solid #333; border-radius: 4px;
-            padding: 10px 40px; font-family: 'Courier New', monospace;
-            color: var(--lcd-green); text-shadow: 0 0 8px rgba(50, 215, 75, 0.6);
-            font-size: 1.6rem; box-shadow: inset 0 0 10px #000;
+            background: #000; border: 1px solid #333; border-radius: 6px;
+            padding: 10px 30px; font-family: 'Courier New', monospace;
+            color: var(--lcd-green); font-size: 1.8rem; position: relative;
+        }
+        #vamp-indicator { 
+            position: absolute; top: -10px; right: 10px; font-size: 0.6rem; 
+            color: var(--vamp-orange); display: none; font-weight: bold;
         }
 
-        .stage {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: radial-gradient(circle at center, #1a1b1f 0%, #080809 100%);
-        }
-        .section-box {
-            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
-            padding: 50px 100px; border-radius: 20px; text-align: center;
-            backdrop-filter: blur(10px); margin-bottom: 30px; min-width: 65%;
-        }
+        .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* THE HUD */
+        .section-box { text-align: center; margin-bottom: 20px; }
         .section-label {
-            font-size: 8vw; font-weight: 900; margin: 0; text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff 40%, #777 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 9vw; font-weight: 900; margin: 0; text-transform: uppercase;
+            color: #fff; text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .lyrics-cue { font-size: 2.2vw; color: #666; font-weight: 300; margin-top: 20px; }
+        .next-up-card {
+            background: rgba(255,255,255,0.05); padding: 10px 30px; border-radius: 40px;
+            color: var(--text-dim); font-size: 1.2rem; text-transform: uppercase;
+            letter-spacing: 3px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .next-up-card span { color: var(--logic-blue); font-weight: bold; }
 
-        /* BEAT METER */
-        .meter-box { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; }
-        .beat-digit { font-size: 4rem; font-weight: 900; color: #fff; z-index: 2; }
+        /* BEAT RING */
+        .meter-box { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-top: 30px; }
+        .beat-digit { font-size: 3rem; font-weight: 900; color: #fff; }
         svg { transform: rotate(-90deg); position: absolute; }
-        .ring-fill { fill: none; stroke: var(--logic-blue); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 440; stroke-dashoffset: 440; transition: 0.1s linear; }
+        .ring-fill { fill: none; stroke: var(--logic-blue); stroke-width: 8; stroke-dasharray: 440; stroke-dashoffset: 440; transition: 0.1s linear; }
 
         /* FOOTER */
         .footer {
-            height: 120px; background: linear-gradient(to bottom, #1c1d21, #0a0a0b);
-            border-top: 1px solid #333; display: flex; align-items: center; padding: 0 50px; gap: 40px;
+            height: 100px; background: #000; border-top: 1px solid #222;
+            display: flex; align-items: center; padding: 0 40px; justify-content: space-between;
         }
-        .transport-btns { display: flex; gap: 15px; }
-        .circle-btn {
-            width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: 0.2s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        .play-btn { background: radial-gradient(circle, #32d74b, #1a6d26); color: #000; }
-        .play-btn.active { box-shadow: 0 0 20px rgba(50, 215, 75, 0.4); transform: scale(0.95); }
-        .stop-btn { background: radial-gradient(circle, #444, #222); color: #fff; }
-
-        .fader-container { flex: 1; max-width: 300px; }
-        input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: #333; border-radius: 2px; accent-color: var(--logic-blue); }
-
-        .btn-group { display: flex; gap: 5px; }
-        .save-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid #444; color: #888; 
-            padding: 5px 10px; font-size: 0.6rem; border-radius: 4px; cursor: pointer; text-transform: uppercase;
-        }
-        .save-btn:hover { border-color: var(--logic-blue); color: #fff; background: rgba(0,170,255,0.1); }
+        .btn-group { display: flex; gap: 10px; }
+        .save-btn { background: #222; border: none; color: #aaa; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+        .play-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--lcd-green); border: none; cursor: pointer; font-size: 1.2rem; }
+        .play-btn.active { background: var(--vamp-orange); box-shadow: 0 0 20px var(--vamp-orange); }
     </style>
 </head>
-<body>
+<body class="section-verse">
 
     <div id="boot-screen">
         <div class="boot-logo" id="logo">GLYPH</div>
-        <div class="boot-text" id="status">INITIALIZING SYSTEM...</div>
+        <div id="status" style="color: #444; margin-top: 10px;">SYSTEM START</div>
     </div>
 
     <div class="sidebar">
         <div class="sidebar-header">
-            GLYPH CORE
+            COMMAND
             <div class="btn-group">
-                <button class="save-btn" onclick="engine.downloadSample()">GET SAMPLE</button>
+                <button class="save-btn" onclick="engine.downloadSample()">SAMPLE</button>
                 <button class="save-btn" onclick="engine.exportSetlist()">SAVE</button>
             </div>
         </div>
         <div class="song-list" id="setlist"></div>
-        <div class="drop-zone" id="drop-zone">DRAG .JSON SETLIST HERE</div>
     </div>
 
     <div class="main">
         <div class="top-nav">
-            <div id="active-title" style="font-weight: bold; letter-spacing: 2px; color: var(--logic-blue); width: 200px;">READY</div>
-            <div class="lcd-display" id="lcd-clock">001 . 1</div>
-            <div style="font-size: 0.8rem; color: #555; width: 200px; text-align: right;">BPM: <span id="bpm-ui" style="color:white; font-size: 1.2rem;">--</span></div>
+            <div id="active-title" style="letter-spacing: 2px; color: #fff; font-weight: bold;">STANDBY</div>
+            <div class="lcd-display">
+                <div id="vamp-indicator">● LOOP ACTIVE</div>
+                <span id="lcd-clock">001 . 1</span>
+            </div>
+            <div style="text-align: right; color: #555;">BPM: <span id="bpm-ui" style="color:white;">--</span></div>
         </div>
 
         <div class="stage">
             <div class="section-box">
-                <h1 id="section-ui" class="section-label">STANDBY</h1>
-                <div id="lyrics-ui" class="lyrics-cue">Welcome to GLYPH // The Sight of Sound</div>
+                <h1 id="section-ui" class="section-label">GLYPH</h1>
+                <div id="lyrics-ui" style="color: #888; font-size: 1.5rem; margin-top: 10px;">Ready to Lead</div>
+            </div>
+
+            <div class="next-up-card">
+                NEXT: <span id="next-section-ui">---</span>
             </div>
 
             <div class="meter-box">
                 <svg width="150" height="150">
-                    <circle cx="75" cy="75" r="70" fill="none" stroke="#1a1a1c" stroke-width="10" />
+                    <circle cx="75" cy="75" r="70" fill="none" stroke="#111" stroke-width="8" />
                     <circle id="beat-ring" class="ring-fill" cx="75" cy="75" r="70" />
                 </svg>
                 <div class="beat-digit" id="beat-ui">—</div>
@@ -170,52 +151,52 @@
         </div>
 
         <div class="footer">
-            <div class="transport-btns">
-                <div id="play-btn" class="circle-btn play-btn" onclick="engine.start()">▶</div>
-                <div class="circle-btn stop-btn" onclick="engine.stop()">■</div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button id="play-btn" class="play-btn" onclick="engine.toggle()">▶</button>
+                <div style="font-size: 0.7rem; color: #444;">[SPACE] PLAY/STOP  |  [L] VAMP LOOP</div>
             </div>
-
-            <div class="fader-container">
-                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #555; margin-bottom: 8px;">
-                    <span>CLICK GAIN (L-CHANNEL)</span> <span id="vol-txt">50%</span>
-                </div>
-                <input type="range" id="vol-fader" min="0" max="1" step="0.01" value="0.5">
-            </div>
-
-            <div style="font-size: 0.6rem; color: #333; text-align: right; font-weight: 900; letter-spacing: 1px;">
-                GLYPH ENGINE v2.4<br>PRECISION STAGE UTILITY
+            <div style="width: 200px;">
+                <input type="range" id="vol-fader" min="0" max="1" step="0.01" value="0.5" style="width: 100%;">
             </div>
         </div>
     </div>
 
 <script>
     let DATA = [
-        { "title": "Amazing Grace", "bpm": 72, "flow": [{ "name": "Intro", "bars": 2, "lyrics": "Organ Swell" }, { "name": "Verse", "bars": 4, "lyrics": "Amazing Grace..." }] }
+        { "title": "Amazing Grace", "bpm": 72, "flow": [
+            { "name": "Intro", "bars": 2, "lyrics": "Organ Swell" },
+            { "name": "Verse", "bars": 4, "lyrics": "Amazing Grace..." },
+            { "name": "Chorus", "bars": 4, "lyrics": "I once was lost..." },
+            { "name": "Outro", "bars": 2, "lyrics": "End on Tag" }
+        ]}
     ];
 
     class GlyphEngine {
         constructor() {
-            this.ctx = null; this.masterGain = null; this.panner = null;
-            this.playing = false; this.songIdx = 0; this.beat = 0; this.bar = 0; 
-            this.sectionIdx = 0; this.timer = null;
+            this.ctx = null; this.gain = null; this.playing = false;
+            this.vamp = false; this.songIdx = 0; this.beat = 0;
+            this.bar = 0; this.sectionIdx = 0; this.timer = null;
         }
 
         init() {
-            if (!this.ctx) {
-                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                this.masterGain = this.ctx.createGain();
-                this.panner = this.ctx.createStereoPanner();
-                this.panner.pan.value = -1.0; // HARD LEFT FOR CLICK
-                this.masterGain.connect(this.ctx.destination);
-                this.panner.connect(this.masterGain);
-            }
+            if (this.ctx) return;
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.gain = this.ctx.createGain();
+            this.panner = this.ctx.createStereoPanner();
+            this.panner.pan.value = -1; // Click Hard Left
+            this.gain.connect(this.ctx.destination);
+            this.panner.connect(this.gain);
+        }
+
+        toggle() {
+            this.init();
+            this.playing ? this.stop() : this.start();
         }
 
         start() {
-            this.init(); this.ctx.resume();
-            if (this.playing) return;
             this.playing = true;
             document.getElementById('play-btn').classList.add('active');
+            document.getElementById('play-btn').innerText = "■";
             this.scheduler();
         }
 
@@ -223,18 +204,34 @@
             this.playing = false; clearTimeout(this.timer);
             this.beat = 0; this.bar = 0; this.sectionIdx = 0;
             document.getElementById('play-btn').classList.remove('active');
+            document.getElementById('play-btn').innerText = "▶";
             document.getElementById('beat-ui').innerText = "—";
-            document.getElementById('beat-ring').style.strokeDashoffset = 440;
-            document.getElementById('lcd-clock').innerText = "001 . 1";
+            document.body.className = "section-verse";
+        }
+
+        toggleVamp() {
+            this.vamp = !this.vamp;
+            document.getElementById('vamp-indicator').style.display = this.vamp ? "block" : "none";
+            document.getElementById('lcd-clock').style.color = this.vamp ? "var(--vamp-orange)" : "var(--lcd-green)";
         }
 
         updateUI() {
             const song = DATA[this.songIdx];
             const section = song.flow[this.sectionIdx];
+            const next = song.flow[this.sectionIdx + 1] || { name: "END" };
+
             document.getElementById('active-title').innerText = song.title.toUpperCase();
             document.getElementById('bpm-ui').innerText = song.bpm;
             document.getElementById('section-ui').innerText = section.name;
             document.getElementById('lyrics-ui').innerText = section.lyrics;
+            document.getElementById('next-section-ui').innerText = next.name;
+
+            // Update Background Color
+            const name = section.name.toLowerCase();
+            document.body.className = "";
+            if (name.includes("verse")) document.body.classList.add("section-verse");
+            if (name.includes("chorus")) document.body.classList.add("section-chorus");
+            if (name.includes("bridge")) document.body.classList.add("section-bridge");
         }
 
         scheduler() {
@@ -242,11 +239,14 @@
             const song = DATA[this.songIdx];
             const section = song.flow[this.sectionIdx];
 
+            // Sound
             const osc = this.ctx.createOscillator();
             osc.frequency.value = this.beat === 0 ? 1000 : 500;
             osc.connect(this.panner);
             osc.start(); osc.stop(this.ctx.currentTime + 0.05);
 
+            // Visuals
+            this.updateUI();
             document.getElementById('beat-ui').innerText = this.beat + 1;
             document.getElementById('lcd-clock').innerText = `${String(this.bar + 1).padStart(3, '0')} . ${this.beat + 1}`;
             document.getElementById('beat-ring').style.strokeDashoffset = 440 - ((this.beat + 1) / 4) * 440;
@@ -255,28 +255,31 @@
             if (this.beat >= 4) {
                 this.beat = 0; this.bar++;
                 if (this.bar >= section.bars) {
-                    this.bar = 0; this.sectionIdx++;
-                    if (this.sectionIdx >= song.flow.length) { this.stop(); return; }
+                    if (this.vamp) {
+                        this.bar = 0; // REPEAT SECTION
+                    } else {
+                        this.bar = 0; this.sectionIdx++;
+                        if (this.sectionIdx >= song.flow.length) { this.stop(); return; }
+                    }
                 }
-                this.updateUI();
             }
             this.timer = setTimeout(() => this.scheduler(), (60 / song.bpm) * 1000);
         }
 
         exportSetlist() {
             const blob = new Blob([JSON.stringify(DATA, null, 2)], {type : 'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = 'glyph-setlist.json'; a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'glyph-pro-setlist.json'; a.click();
         }
 
         downloadSample() {
-            const sampleData = [
-                { "title": "I Thank God", "bpm": 130, "flow": [ { "name": "Intro", "bars": 4, "lyrics": "Full Band" }, { "name": "Chorus", "bars": 8, "lyrics": "He saved me!" } ] },
-                { "title": "Total Praise", "bpm": 62, "flow": [ { "name": "Amen", "bars": 12, "lyrics": "A-men, A-men..." } ] }
+            const sample = [
+                { "title": "Praise Break", "bpm": 145, "flow": [{ "name": "VAMP", "bars": 4, "lyrics": "Keep it pushing!" }] },
+                { "title": "Worship Medley", "bpm": 70, "flow": [{ "name": "Verse", "bars": 8, "lyrics": "Holy Forever" }, { "name": "Chorus", "bars": 8, "lyrics": "Singing Holy..." }] }
             ];
-            const blob = new Blob([JSON.stringify(sampleData, null, 2)], {type : 'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = 'sunday-morning-pack.json'; a.click();
+            const blob = new Blob([JSON.stringify(sample, null, 2)], {type : 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'glyph-sample.json'; a.click();
         }
     }
 
@@ -288,42 +291,22 @@
         DATA.forEach((song, i) => {
             const btn = document.createElement('button');
             btn.className = 'song-btn' + (i === engine.songIdx ? ' active' : '');
-            btn.innerHTML = `<b>${song.title}</b><br><small style="opacity:0.4">${song.bpm} BPM</small>`;
+            btn.innerHTML = `<b>${song.title}</b><br><small>${song.bpm} BPM</small>`;
             btn.onclick = () => { engine.stop(); engine.songIdx = i; renderSetlist(); engine.updateUI(); };
             list.appendChild(btn);
         });
     }
 
     window.onload = () => {
-        const logo = document.getElementById('logo');
-        const status = document.getElementById('status');
-        const screen = document.getElementById('boot-screen');
-        setTimeout(() => { logo.style.opacity = "1"; logo.style.transform = "translateY(0)"; }, 500);
-        const logs = ["MOUNTING AUDIO ENGINE", "MAPPING STEREO CHANNELS", "SYSTEM READY"];
-        logs.forEach((msg, i) => setTimeout(() => { status.innerText = msg; }, 1000 + (i * 600)));
-        setTimeout(() => { screen.style.opacity = "0"; setTimeout(() => screen.style.display = "none", 1000); }, 3500);
-        renderSetlist(); engine.updateUI();
+        setTimeout(() => { document.getElementById('logo').style.opacity = "1"; }, 500);
+        setTimeout(() => { document.getElementById('boot-screen').style.display = "none"; }, 3000);
+        renderSetlist();
     };
 
-    const zone = document.getElementById('drop-zone');
-    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('hover'); };
-    zone.ondragleave = () => zone.classList.remove('hover');
-    zone.ondrop = (e) => {
-        e.preventDefault(); zone.classList.remove('hover');
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            try { DATA = JSON.parse(ev.target.result); engine.stop(); engine.songIdx = 0; renderSetlist(); engine.updateUI(); }
-            catch(err) { alert("Format Error"); }
-        };
-        reader.readAsText(e.dataTransfer.files[0]);
+    window.onkeydown = (e) => {
+        if (e.code === "Space") { e.preventDefault(); engine.toggle(); }
+        if (e.key.toLowerCase() === "l") { engine.toggleVamp(); }
     };
-
-    document.getElementById('vol-fader').oninput = (e) => {
-        if (engine.masterGain) engine.masterGain.gain.setTargetAtTime(e.target.value, engine.ctx.currentTime, 0.03);
-        document.getElementById('vol-txt').innerText = Math.round(e.target.value * 100) + "%";
-    };
-
-    window.onkeydown = (e) => { if (e.code === "Space") { e.preventDefault(); engine.playing ? engine.stop() : engine.start(); } };
 </script>
 </body>
 </html>
